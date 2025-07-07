@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>List Suntik Sosmed</title>
+  <style>
+    body {
+      font-family: 'Arial Rounded MT Bold', sans-serif;
+      margin: 0;
+      padding: 0;
+      background: #fff;
+    }
+
+    header {
+      background-color: #cc2c2c;
+      color: white;
+      padding: 20px 0;
+      font-size: 24px;
+      border-bottom-left-radius: 40px;
+      border-bottom-right-radius: 40px;
+      text-align: center;
+    }
+
+    .sub-header {
+      text-align: center;
+      font-size: 15px;
+      font-weight: 500;
+      color: white;
+      margin-top: -20px;
+      margin-bottom: 15px;
+    }
+
+    .tabs {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin: 20px 0;
+    }
+
+    .tab-button {
+      background-color: #cc2c2c;
+      color: white;
+      padding: 10px 25px;
+      border: none;
+      margin: 5px 10px;
+      border-radius: 10px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    .tab-button.active {
+      background-color: white;
+      color: #cc2c2c;
+      border: 2px solid #cc2c2c;
+    }
+
+    .diamond-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      padding: 20px;
+      justify-content: center;
+      max-width: 1000px;
+      margin: 0 auto;
+    }
+
+    .diamond-card {
+      position: relative;
+      background-color: white;
+      border-radius: 15px;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+      width: 40%;
+      height: 10vh;
+      padding: 10px 12px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      min-width: 150px;
+      min-height: 60px;
+      overflow: hidden;
+      opacity: 0;
+    }
+
+    .diamond-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .diamond-top span {
+      font-size: 13px;
+      font-weight: bold;
+    }
+
+    .diamond-top img {
+      width: 20px;
+      height: 20px;
+    }
+
+    .price-tag {
+      position: absolute;
+      background-color: #cc2c2c;
+      color: white;
+      padding: 1px 15px;
+      border-top-left-radius: 8px;
+      font-size: 12px;
+      bottom: 1px;
+      right: 1px;
+    }
+
+    @keyframes fade-in {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .fade-in {
+      animation: fade-in 0.6s ease forwards;
+    }
+
+    .panduan-wrapper {
+      display: flex;
+      justify-content: center;
+      margin: 50px auto 20px;
+    }
+
+    /* === POP-UP PANDUAN === */
+    .popup-panduan {
+      display: none;
+      position: fixed;
+      z-index: 999;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0,0,0,0.4);
+    }
+
+    .popup-box {
+      background: white;
+      max-width: 90%;
+      width: 320px;
+      margin: 100px auto;
+      padding: 20px;
+      border-radius: 15px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+      position: relative;
+      text-align: left;
+      animation: fade-in 0.3s ease;
+    }
+
+    .popup-box h3 {
+      margin-top: 0;
+      color: #cc2c2c;
+      font-size: 18px;
+    }
+
+    .popup-box p {
+      font-size: 14px;
+      color: #333;
+      line-height: 1.6;
+    }
+
+    .close-btn {
+      position: absolute;
+      top: 10px;
+      right: 15px;
+      font-size: 20px;
+      font-weight: bold;
+      color: #888;
+      cursor: pointer;
+    }
+
+    @media (max-width: 600px) {
+      .diamond-card {
+        width: 90px;
+        height: 10px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <header>BONSKUY STORE</header>
+  <div class="sub-header">TOKO KEBUTUHAN SOSMED TERMURAH</div>
+
+  <div class="tabs">
+    <button class="tab-button active" onclick="filterKategori('tiktok')">TIK TOK</button>
+    <button class="tab-button" onclick="filterKategori('whatsapp')">WHATSAPP</button>
+    <button class="tab-button" onclick="filterKategori('instagram')">INSTAGRAM</button>
+  </div>
+
+  <div class="diamond-list" id="product-list"></div>
+
+  <!-- Tombol Panduan di bagian paling bawah -->
+  <div class="panduan-wrapper">
+    <button onclick="bukaPanduan()" style="background:#cc2c2c; color:white; padding:10px 25px; border:none; border-radius:8px; font-weight:bold; cursor:pointer;">
+      ⚠️INFOMASI⚠️
+    </button>
+  </div>
+
+  <!-- Pop-up Panduan -->
+  <div class="popup-panduan" id="popupPanduan">
+    <div class="popup-box">
+      <span class="close-btn" onclick="tutupPanduan()">&times;</span>
+      <h3>Informasi Penting</h3>
+      <p>
+        1.website ini hanya untuk informasi list produk dari Bonskuy Store.<br>
+        2.Jika ingin order silakan hub: 0851-4131-6926.<br>
+      </p>
+    </div>
+  </div>
+
+  <script>
+    const produk = [
+      // FOLLOWERS TIKTOK
+      { nama: '100 Followers', harga: 7000, kategori: 'tiktok' },
+      { nama: '200 Followers', harga: 10000, kategori: 'tiktok' },
+      { nama: '300 Followers', harga: 13000, kategori: 'tiktok' },
+      { nama: '400 Followers', harga: 16000, kategori: 'tiktok' },
+      { nama: '500 Followers', harga: 19000, kategori: 'tiktok' },
+      { nama: '600 Followers', harga: 22000, kategori: 'tiktok' },
+      { nama: '700 Followers', harga: 25000, kategori: 'tiktok' },
+      { nama: '800 Followers', harga: 28000, kategori: 'tiktok' },
+      { nama: '900 Followers', harga: 31000, kategori: 'tiktok' },
+      { nama: '1.000 Followers', harga: 36000, kategori: 'tiktok' },
+      //LIKE TIKTOK
+      { nama: '100 Like', harga: 3000, kategori: 'tiktok' },
+      { nama: '200 Like', harga: 5000, kategori: 'tiktok' },
+      { nama: '300 Like', harga: 7000, kategori: 'tiktok' },
+      { nama: '400 Like', harga: 9000, kategori: 'tiktok' },
+      { nama: '500 Like', harga: 11000, kategori: 'tiktok' },
+      { nama: '600 Like', harga: 13000, kategori: 'tiktok' },
+     { nama: '700 Like', harga: 15000, kategori: 'tiktok' },
+     { nama: '800 Like', harga: 17000, kategori: 'tiktok' },
+     { nama: '900 Like', harga: 19000, kategori: 'tiktok' },
+     { nama: '1.000 Like', harga: 21000, kategori: 'tiktok' },
+     //VIEWS TIKTOK
+     { nama: '2.000 View', harga: 2000, kategori: 'tiktok' },
+     { nama: '3.000 View', harga: 4000, kategori: 'tiktok' },
+     { nama: '4.000 View', harga: 6000, kategori: 'tiktok' },
+     { nama: '5.000 View', harga: 8000, kategori: 'tiktok' },
+     { nama: '6.000 View', harga: 10000, kategori: 'tiktok' },
+     { nama: '7.000 View', harga: 12000, kategori: 'tiktok' },
+     { nama: '8.000 View', harga: 14000, kategori: 'tiktok' },
+     { nama: '9.000 View', harga: 16000, kategori: 'tiktok' },
+     { nama: '10.000 View', harga: 18000, kategori: 'tiktok' },
+     { nama: '15.000 View', harga: 20000, kategori: 'tiktok' },
+
+      // WhatsApp
+      { nama: '100 Followers', harga: 7000, kategori: 'whatsapp' },
+      { nama: '200 Followers', harga: 10000, kategori: 'whatsapp' },
+      { nama: '300 Followers', harga: 13000, kategori: 'whatsapp' },
+      { nama: '400 Followers', harga: 16000, kategori: 'whatsapp' },
+      { nama: '500 Followers', harga: 19000, kategori: 'whatsapp' },
+      { nama: '600 Followers', harga: 23000, kategori: 'whatsapp' },
+      { nama: '700 Followers', harga: 27000, kategori: 'whatsapp' },
+      { nama: '800 Followers', harga: 30000, kategori: 'whatsapp' },
+      { nama: '900 Followers', harga: 34000, kategori: 'whatsapp' },
+      { nama: '1000 Followers', harga: 37000, kategori: 'whatsapp' },
+      //EMOJI REACTIONS
+      { nama: '100 Emoji Reactions', harga: 5000, kategori: 'whatsapp' },
+      { nama: '200 Emoji Reactions', harga: 7000, kategori: 'whatsapp' },
+      { nama: '300 Emoji Reactions', harga: 9000, kategori: 'whatsapp' },
+      { nama: '400 Emoji Reactions', harga: 11000, kategori: 'whatsapp' },
+      { nama: '500 Emoji Reactions', harga: 13000, kategori: 'whatsapp' },
+      { nama: '600 Emoji Reactions', harga: 15000, kategori: 'whatsapp' },
+      { nama: '700 Emoji Reactions', harga: 17000, kategori: 'whatsapp' },
+      { nama: '800 Emoji Reactions', harga: 19000, kategori: 'whatsapp' },
+      { nama: '900 Emoji Reactions', harga: 21000, kategori: 'whatsapp' },
+      { nama: '1000 Emoji Reactions', harga: 23000, kategori: 'whatsapp' },
+
+      // Instagram
+      { nama: '100 Followers', harga: 5000, kategori: 'instagram' },
+      { nama: '200 Followers', harga: 8000, kategori: 'instagram' },
+      { nama: '300 Followers', harga: 11000, kategori: 'instagram' },
+      { nama: '400 Followers', harga: 14000, kategori: 'instagram' },
+      { nama: '500 Followers', harga: 17000, kategori: 'instagram' },
+      { nama: '600 Followers', harga: 20000, kategori: 'instagram' },
+      { nama: '700 Followers', harga: 23000, kategori: 'instagram' },
+      { nama: '800 Followers', harga: 26000, kategori: 'instagram' },
+      { nama: '900 Followers', harga: 29000, kategori: 'instagram' },
+      { nama: '1000 Followers', harga: 32000, kategori: 'instagram' },
+      //LIKE INSTAGRAM
+      { nama: '100 Like', harga: 3000, kategori: 'instagram' },
+      { nama: '200 Like', harga: 2000, kategori: 'instagram' },
+      { nama: '300 Like', harga: 7000, kategori: 'instagram' },
+      { nama: '400 Like', harga: 8000, kategori: 'instagram' },
+      { nama: '500 Like', harga: 10000, kategori: 'instagram' },
+      { nama: '600 Like', harga: 12000, kategori: 'instagram' },
+      { nama: '700 Like', harga: 14000, kategori: 'instagram' },
+      { nama: '800 Like', harga: 16000, kategori: 'instagram' },
+      { nama: '900 Like', harga: 18000, kategori: 'instagram' },
+      { nama: '1000 Like', harga: 20000, kategori: 'instagram' },
+    ];
+
+    const iconKategori = {
+      tiktok: 'https://cdn-icons-png.flaticon.com/512/3046/3046121.png',
+      whatsapp: 'https://cdn-icons-png.flaticon.com/512/733/733585.png',
+      instagram: 'https://cdn-icons-png.flaticon.com/512/2111/2111463.png'
+    };
+
+    const container = document.getElementById('product-list');
+
+    function tampilkanProduk(kategori) {
+      container.innerHTML = '';
+      const icon = iconKategori[kategori];
+
+      produk
+        .filter(p => p.kategori === kategori)
+        .forEach((p, i) => {
+          const card = document.createElement('div');
+          card.className = 'diamond-card fade-in';
+          card.style.animationDelay = `${i * 80}ms`;
+
+          card.innerHTML = `
+            <div class="diamond-top">
+              <span>${p.nama}</span>
+              <img src="${icon}" alt="${p.kategori}" />
+            </div>
+            <div class="price-tag">Rp ${p.harga.toLocaleString('id-ID')}</div>
+          `;
+          container.appendChild(card);
+        });
+    }
+
+    function filterKategori(kategori) {
+      document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
+      const tabIndex = { tiktok: 0, whatsapp: 1, instagram: 2 }[kategori];
+      document.querySelectorAll('.tab-button')[tabIndex].classList.add('active');
+      tampilkanProduk(kategori);
+    }
+
+    function bukaPanduan() {
+      document.getElementById("popupPanduan").style.display = "block";
+    }
+
+    function tutupPanduan() {
+      document.getElementById("popupPanduan").style.display = "none";
+    }
+
+    tampilkanProduk('tiktok');
+  </script>
+
+</body>
+</html>
